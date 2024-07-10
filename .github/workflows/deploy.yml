@@ -17,13 +17,6 @@ jobs:
         with:
           php-version: '8.1'
 
-      - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql-database: laravel
-          mysql-user: root
-          mysql-password:
-
       - name: Copy .env file
         run: cp .env.example .env
 
@@ -42,16 +35,6 @@ jobs:
       - name: Run PHPUnit tests
         env:
           APP_ENV: testing
-          DB_CONNECTION: mysql
-          DB_USERNAME: root
-          DB_PASSWORD:
-          DB_DATABASE: laravel
         run: php artisan test
 
-      - name: Deploy to local server
-        if: ${{ success() }}
-        run: |
-          cd apps/laravel-example  # Adjust path accordingly
-          git pull origin main  # Assuming your main branch is 'main'
-          composer install --no-dev --optimize-autoloader
-          php artisan migrate --force
+      # Add deployment steps here if necessary
