@@ -23,18 +23,7 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-scripts --no-interaction --no-progress --prefer-dist
 
-      - name: Setup Laravel project
-        run: |
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan key:generate
-
-      - name: Set permissions
-        run: chmod -R 755 storage bootstrap/cache
-
       - name: Run PHPUnit tests
         env:
           APP_ENV: testing
         run: php artisan test
-
-      # Add deployment steps here if necessary
