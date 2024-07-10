@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql-database: laravel
+          mysql-user: root
+          mysql-password:
+
+      - name: Copy .env file
+        run: cp .env.example .env
+
+      - name: Install Composer dependencies
+        run: composer install --no-scripts --no-interaction --no-progress --prefer-dist
+
+      - name: Setup Laravel project
+        run: |
+          php artisan config:clear
+          php artisan cache:clear
+          php artisan key:generate
+
+      - name: Set permissions
+        run: chmod -R 755 storage bootstrap/cache
+
+      - name: Run PHPUnit tests
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_USERNAME: root
+          DB_PASSWORD:
+          DB_DATABASE: laravel
+        run: php artisan test
+
+      - name: Deploy to local server
+        if: ${{ success() }}
+        run: |
+          cd apps/laravel-example  # Adjust path accordingly
+          git pull origin main  # Assuming your main branch is 'main'
+          composer install --no-dev --optimize-autoloader
+          php artisan migrate --force
